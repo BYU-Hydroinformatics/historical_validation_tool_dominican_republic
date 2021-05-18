@@ -18,6 +18,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from scipy import integrate
 from tethys_sdk.gizmos import PlotlyView
+import time
 
 ## global values ##
 watershed = 'none'
@@ -52,11 +53,13 @@ def home(request):
 
 	return render(request, 'historical_validation_tool_dominican_republic/home.html', context)
 
-
 def get_popup_response(request):
 	"""
 	Get simulated data from api
 	"""
+
+	start_time = time.time()
+
 	get_data = request.GET
 	return_obj = {}
 
@@ -99,6 +102,89 @@ def get_popup_response(request):
 		codEstacion = get_data['stationcode']
 		nomEstacion = get_data['stationname']
 
+		# # get Simulated Streamflow
+		# simulated_df = geoglows.streamflow.historic_simulation(comid, forcing='era_5', return_format='csv')
+		# # Removing Negative Values
+		# simulated_df[simulated_df < 0] = 0
+		# simulated_df.index = simulated_df.index.to_series().dt.strftime("%Y-%m-%d")
+		# simulated_df.index = pd.to_datetime(simulated_df.index)
+		# simulated_df = pd.DataFrame(data=simulated_df.iloc[:, 0].values, index=simulated_df.index, columns=['Simulated Streamflow'])
+		#
+		# '''Get Observed Data'''
+		#
+		# url = 'http://128.187.106.131/app/index.php/dr/services/cuahsi_1_1.asmx/GetValuesObject?location={0}&variable=Q&startDate=1900-01-01&endDate=2019-12-31&version=1.1'.format(codEstacion)
+		#
+		# r = requests.get(url, verify=False)
+		# c = xmltodict.parse(r.content)
+		#
+		# y = []
+		# x = []
+		#
+		# for i in c['timeSeriesResponse']['timeSeries']['values']['value']:
+		# 	y.append(float((i['#text'])))
+		# 	x.append(dt.datetime.strptime((i['@dateTime']), "%Y-%m-%dT%H:%M:%S"))
+		#
+		# df = pd.DataFrame(data=y, index=x, columns=['Streamflow'])
+		# df.head()
+		#
+		# datesDischarge = df.index.tolist()
+		# dataDischarge = df.iloc[:, 0].values
+		#
+		# if isinstance(dataDischarge[0], str):
+		# 	dataDischarge = map(float, dataDischarge)
+		#
+		# observed_df = pd.DataFrame(data=dataDischarge, index=datesDischarge, columns=['Observed Streamflow'])
+		#
+		# '''Correct the Bias in Sumulation'''
+		#
+		# corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
+
+		'''Get Forecasts'''
+		forecast_df = geoglows.streamflow.forecast_stats(comid, return_format='csv')
+		# Removing Negative Values
+		forecast_df[forecast_df < 0] = 0
+
+		# '''Correct Bias Forecasts'''
+		# fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
+		#
+		# '''Get Forecasts Records'''
+		# try:
+		# 	forecast_record = geoglows.streamflow.forecast_records(comid)
+		# 	forecast_record[forecast_record < 0] = 0
+		# 	forecast_record = forecast_record.loc[forecast_record.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+		#
+		# 	'''Correct Bias Forecasts Records'''
+		# 	fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
+		# 	fixed_records = fixed_records.loc[fixed_records.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+		# except:
+		# 	print('There is no forecast record')
+
+		print("finished get_popup_response")
+
+		print("--- %s seconds getpopup ---" % (time.time() - start_time))
+
+		return JsonResponse({})
+
+	except Exception as e:
+		print(str(e))
+		return JsonResponse({'error': 'No data found for the selected station.'})
+
+
+def get_hydrographs(request):
+	"""
+	Get observed data from csv files in Hydroshare
+	Get historic simulations from ERA Interim
+	"""
+	get_data = request.GET
+	global codEstacion
+	global nomEstacion
+	global simulated_df
+	global observed_df
+	global corrected_df
+	global comid
+	start_time = time.time()
+
+	try:
 		# get Simulated Streamflow
 		simulated_df = geoglows.streamflow.historic_simulation(comid, forcing='era_5', return_format='csv')
 		# Removing Negative Values
@@ -136,48 +222,6 @@ def get_popup_response(request):
 
 		corrected_df = geoglows.bias.correct_historical(simulated_df, observed_df)
 
-		'''Get Forecasts'''
-		forecast_df = geoglows.streamflow.forecast_stats(comid, return_format='csv')
-		# Removing Negative Values
-		forecast_df[forecast_df < 0] = 0
-
-		'''Correct Bias Forecasts'''
-		fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
-
-		'''Get Forecasts Records'''
-		try:
-			forecast_record = geoglows.streamflow.forecast_records(comid)
-			forecast_record[forecast_record < 0] = 0
-			forecast_record = forecast_record.loc[forecast_record.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
-
-			'''Correct Bias Forecasts Records'''
-			fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
-			fixed_records = fixed_records.loc[fixed_records.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
-		except:
-			print('There is no forecast record')
-
-		print("finished get_popup_response")
-		return JsonResponse({})
-
-	except Exception as e:
-		print(str(e))
-		return JsonResponse({'error': 'No data found for the selected station.'})
-
-
-def get_hydrographs(request):
-	"""
-	Get observed data from csv files in Hydroshare
-	Get historic simulations from ERA Interim
-	"""
-	get_data = request.GET
-	global codEstacion
-	global nomEstacion
-	global simulated_df
-	global observed_df
-	global corrected_df
-
-	try:
-
 		'''Plotting Data'''
 		observed_Q = go.Scatter(x=observed_df.index, y=observed_df.iloc[:, 0].values, name='Observed', )
 		simulated_Q = go.Scatter(x=simulated_df.index, y=simulated_df.iloc[:, 0].values, name='Simulated', )
@@ -193,6 +237,7 @@ def get_hydrographs(request):
 		context = {
 			'gizmo_object': chart_obj,
 		}
+		print("--- %s seconds hydrographs ---" % (time.time() - start_time))
 
 		return render(request, 'historical_validation_tool_dominican_republic/gizmo_ajax.html', context)
 
