@@ -12,6 +12,9 @@
 {% endblock %}
 
 {% block header_buttons %}
+  <div class="hidden" style="margin-right: 15px;">
+    {% gizmo text_input geoserver_endpoint %}
+  </div>
   <div class="header-button glyphicon-button" data-toggle="tooltip" data-placement="bottom" title="View Graph">
     <a data-toggle="modal" data-target="#obsgraph"><span class="glyphicon glyphicon-globe"></span></a>
   </div>

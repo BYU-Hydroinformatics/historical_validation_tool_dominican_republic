@@ -21,6 +21,8 @@ from tethys_sdk.gizmos import *
 import time
 import io
 
+from .app import HistoricalValidationToolDominicanRepublic as app
+
 ## global values ##
 watershed = 'none'
 subbasin = 'none'
@@ -48,8 +50,23 @@ def home(request):
     # List of Metrics to include in context
     metric_loop_list = list(zip(metric_names, metric_abbr))
 
-    # Available Forecast Dates
+    # Retrieve a geoserver engine and geoserver credentials.
+    geoserver_engine = app.get_spatial_dataset_service(
+	    name='main_geoserver', as_engine=True)
 
+    geos_username = geoserver_engine.username
+    geos_password = geoserver_engine.password
+    my_geoserver = geoserver_engine.endpoint.replace('rest', '')
+
+    geoserver_base_url = my_geoserver
+    geoserver_workspace = app.get_custom_setting('workspace')
+    region = app.get_custom_setting('region')
+    geoserver_endpoint = TextInput(display_text='',
+                                   initial=json.dumps([geoserver_base_url, geoserver_workspace, region]),
+                                   name='geoserver_endpoint',
+                                   disabled=True)
+
+    # Available Forecast Dates
     res = requests.get('https://geoglows.ecmwf.int/api/AvailableDates/?region=central_america-geoglows', verify=False)
     data = res.json()
     dates_array = (data.get('available_dates'))
@@ -83,6 +100,7 @@ def home(request):
 
     context = {
         "metric_loop_list": metric_loop_list,
+	    "geoserver_endpoint": geoserver_endpoint,
         "date_picker": date_picker,
     }
 
