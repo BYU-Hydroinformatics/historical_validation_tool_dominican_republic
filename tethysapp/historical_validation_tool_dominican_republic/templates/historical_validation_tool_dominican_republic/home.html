@@ -35,6 +35,7 @@
               <div align="right">
                 <img class="obslogos" src="{% static 'historical_validation_tool_dominican_republic/images/byu_logo.png' %}">
                 <img class="obslogos" src="{% static 'historical_validation_tool_dominican_republic/images/my-icon.jpeg' %}">
+                <img class="obslogos" src="{% static 'historical_validation_tool_dominican_republic/images/Servir_logo.jpeg' %}">
               </div>
             </div>
             <div id="interaction"></div>
@@ -183,9 +184,10 @@
             <div role="tabpanel" class="tab-pane" id="forecast">
               <div class="panel panel-default">
                 <div class="panel-body">
-                  <!--<div id="dates" class="hidden form-group" style="padding: 30px 30px 20px 0">-->
+                  <div id="dates" class="hidden form-group" style="padding: 30px 30px 20px 0">
                     <!--<select id="datesSelect" class="form-control"></select>-->
-                  <!--</div>-->
+                    {% gizmo date_picker %}
+                  </div>
                   <div class="flex-container-row"><img id="forecast-loading" class="view-file hidden" src="{% static 'historical_validation_tool_dominican_republic/images/loader.gif' %}" /></div>
                   <div id="forecast-chart"></div>
                   <div id="download_forecast" class="btn-group hidden" role="group">

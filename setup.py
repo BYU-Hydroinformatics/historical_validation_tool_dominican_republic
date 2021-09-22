@@ -14,10 +14,10 @@ resource_files += find_resource_files('tethysapp/' + app_package + '/public', 't
 
 setup(
     name=release_package,
-    version='1.0',
+    version='1.1',
     description='This app evaluates the accuracy for the historical streamflow values obtained from Streamflow Prediction Tool in Dominican Republic.',
     long_description='',
-    keywords='"Hydrology", "Time Series", "Bias Correction", "Hydrostats", "GEOGloWS", "Historical Validation Tool"',
+    keywords='"Hydrology", "Time Series", "Bias Correction", "Hydrostats", "GEOGloWS", "Historical Validation Tool", "Dominican Republic"',
     author='Jorge Luis Sanchez-Lozano',
     author_email='jorgessanchez7@gmail.com',
     url='',

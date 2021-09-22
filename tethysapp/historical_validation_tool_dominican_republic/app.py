@@ -13,7 +13,7 @@ class HistoricalValidationToolDominicanRepublic(TethysAppBase):
     root_url = 'historical-validation-tool-dominican-republic'
     color = '#002255'
     description = 'This app evaluates the accuracy for the historical streamflow values obtained from Streamflow Prediction Tool in Dominican Republic.'
-    tags = '"Hydrology", "Time Series", "Bias Correction", "Hydrostats", "GEOGloWS", "Historical Validation Tool"'
+    tags = '"Hydrology", "Time Series", "Bias Correction", "Hydrostats", "GEOGloWS", "Historical Validation Tool", "Dominican Republic"'
     enable_feedback = False
     feedback_emails = []
 
@@ -73,6 +73,11 @@ class HistoricalValidationToolDominicanRepublic(TethysAppBase):
                 name='make_table_ajax',
                 url='make-table-ajax',
                 controller='historical_validation_tool_dominican_republic.controllers.make_table_ajax'
+            ),
+            UrlMap(
+	            name='get-available-dates',
+	            url='ecmwf-rapid/get-available-dates',
+	            controller='historical_validation_tool_dominican_republic.controllers.get_available_dates'
             ),
             UrlMap(
                 name='get-time-series',
