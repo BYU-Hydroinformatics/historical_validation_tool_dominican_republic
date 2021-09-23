@@ -62,8 +62,7 @@ function init_map() {
 
 	var streams = new ol.layer.Image({
 		source: new ol.source.ImageWMS({
-			url: 'https://tethys2.byu.edu/geoserver/dominican_republic_hydroviewer/wms',
-			//url: 'https://tethys.byu.edu/geoserver/dominican_republic_hydroviewer/wms',
+			url: JSON.parse($('#geoserver_endpoint').val())[0].replace(/\/$/, "") + JSON.parse($('#geoserver_endpoint').val())[1] + '/wms',
 			params: { 'LAYERS': 'dominican_republic-geoglows-drainageline' },
 			serverType: 'geoserver',
 			crossOrigin: 'Anonymous'
@@ -73,8 +72,7 @@ function init_map() {
 
 	var stations = new ol.layer.Image({
 		source: new ol.source.ImageWMS({
-			url: 'https://tethys2.byu.edu/geoserver/dominican_republic_hydroviewer/wms',
-			//url: 'https://tethys.byu.edu/geoserver/dominican_republic_hydroviewer/wms',
+			url: JSON.parse($('#geoserver_endpoint').val())[0].replace(/\/$/, "") + JSON.parse($('#geoserver_endpoint').val())[1] + '/wms',
 			params: { 'LAYERS': 'INDRHI_Stations_Selected' },
 			serverType: 'geoserver',
 			crossOrigin: 'Anonymous'
@@ -94,8 +92,7 @@ function init_map() {
 
 }
 
-let ajax_url = 'https://tethys2.byu.edu/geoserver/dominican_republic_hydroviewer/wfs?request=GetCapabilities';
-//let ajax_url = 'https://tethys.byu.edu/geoserver/dominican_republic_hydroviewer/wfs?request=GetCapabilities';
+let ajax_url = JSON.parse($('#geoserver_endpoint').val())[0].replace(/\/$/, "") + JSON.parse($('#geoserver_endpoint').val())[1] + '/wfs?request=GetCapabilities';
 
 let capabilities = $.ajax(ajax_url, {
 	type: 'GET',

@@ -20,6 +20,7 @@ from scipy import integrate
 from tethys_sdk.gizmos import *
 import time
 import io
+import os
 
 from .app import HistoricalValidationToolDominicanRepublic as app
 
@@ -98,10 +99,20 @@ def home(request):
                              today_button=True,
                              initial='')
 
+    region_index = json.load(open(os.path.join(os.path.dirname(__file__), 'public', 'geojson', 'index.json')))
+    regions = SelectInput(
+        display_text='Zoom to a Region:',
+        name='regions',
+        multiple=False,
+        original=True,
+        options=[(region_index[opt]['name'], opt) for opt in region_index]
+    )
+
     context = {
         "metric_loop_list": metric_loop_list,
 	    "geoserver_endpoint": geoserver_endpoint,
         "date_picker": date_picker,
+        "regions": regions
     }
 
     return render(request, 'historical_validation_tool_dominican_republic/home.html', context)

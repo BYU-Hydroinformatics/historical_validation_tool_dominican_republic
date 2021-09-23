@@ -8,7 +8,14 @@
 {% endblock %}
 
 {% block app_content %}
-  <div id="map" class="map"></div>
+  <div id="map" class="map">
+    <div id="map-view-legend" class="map-view-legend ol-unselectable ol-control">
+      <div>
+        <br>
+        {% gizmo select_input regions %}
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {% block header_buttons %}
