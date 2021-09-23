@@ -802,6 +802,7 @@ def get_units_title(unit_type):
 
 
 def get_time_series(request):
+    print("entering get_time_series")
     get_data = request.GET
     global comid
     global codEstacion
@@ -814,7 +815,6 @@ def get_time_series(request):
     try:
 
         startdate = get_data['startdate']
-
         print('startdate')
         print(get_data['startdate'])
 
@@ -831,7 +831,7 @@ def get_time_series(request):
         forecast_df.index = forecast_df.index.to_series().dt.strftime("%Y-%m-%d %H:%M:%S")
         forecast_df.index = pd.to_datetime(forecast_df.index)
 
-        print (forecast_df)
+        # print (forecast_df)
 
         hydroviewer_figure = geoglows.plots.forecast_stats(stats=forecast_df, titles={'Reach ID': comid})
 
@@ -842,12 +842,12 @@ def get_time_series(request):
         forecast_record = geoglows.streamflow.forecast_records(comid)
         forecast_record[forecast_record < 0] = 0
 
-        print(forecast_record)
+        # print(forecast_record)
 
         record_plot = forecast_record.copy()
         #record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
 
-        print(record_plot)
+        # print(record_plot)
 
         '''Getting forecast record'''
 
@@ -915,9 +915,9 @@ def get_time_series(request):
             hydroviewer_figure.add_trace(template(f'50 Year: {r50}', (r50, r50, r100, r100), colors['50 Year']))
             hydroviewer_figure.add_trace(template(f'100 Year: {r100}', (r100, r100, max(r100 + r100 * 0.05, max_visible), max(r100 + r100 * 0.05, max_visible)), colors['100 Year']))
 
-        except:
+        except Exception as e:
             print('There is no return periods for the desired stream')
-
+            print(e)
         chart_obj = PlotlyView(hydroviewer_figure)
 
         print(chart_obj)
@@ -1048,7 +1048,7 @@ def get_time_series_bc(request):
         '''Correct Bias Forecasts Records'''
         fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
         record_plot = fixed_records.copy()
-        record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+        # record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
 
         print(record_plot)
 

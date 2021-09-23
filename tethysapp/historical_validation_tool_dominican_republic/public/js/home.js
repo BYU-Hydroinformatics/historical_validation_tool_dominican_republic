@@ -1,5 +1,6 @@
 // Getting the csrf token
-function get_requestData (watershed, subbasin, streamcomid, stationcode, stationname){
+function get_requestData (watershed, subbasin, streamcomid, stationcode, stationname, startdate){
+  console.log("get_request data");
   getdata = {
       'watershed': watershed,
       'subbasin': subbasin,
@@ -21,7 +22,8 @@ function get_requestData (watershed, subbasin, streamcomid, stationcode, station
       },
       success: function (data) {
         console.log(data)
-        get_hydrographs (watershed, subbasin, streamcomid, stationcode, stationname);
+        get_hydrographs (watershed, subbasin, streamcomid, stationcode, stationname, startdate);
+        console.log("get_hydrographs", startdate);
       }
   })
 
@@ -125,7 +127,7 @@ let capabilities = $.ajax(ajax_url, {
 	}
 });
 
-function get_hydrographs (watershed, subbasin, streamcomid, stationcode, stationname) {
+function get_hydrographs (watershed, subbasin, streamcomid, stationcode, stationname, startdate) {
 	$('#hydrographs-loading').removeClass('hidden');
 	m_downloaded_historical_streamflow = true;
     $.ajax({
@@ -211,6 +213,7 @@ function get_hydrographs (watershed, subbasin, streamcomid, stationcode, station
 				get_volumeAnalysis (watershed, subbasin, streamcomid, stationcode, stationname);
 				createVolumeTable(watershed, subbasin, streamcomid, stationcode, stationname);
 				makeDefaultTable(watershed, subbasin, streamcomid, stationcode, stationname);
+        console.log("antes de get_timeseres",startdate );
 				get_time_series(watershed, subbasin, streamcomid, stationcode, stationname, startdate);
 
                 } else if (data.error) {
@@ -600,7 +603,10 @@ function map_events() {
                         			+ '</h3><h5 id="Station-Code-Tab">Station Code: '
                         			+ stationcode + '</h3><h5 id="COMID-Tab">Station COMID: '
                         			+ streamcomid);
-                        get_requestData(watershed, subbasin, streamcomid, stationcode, stationname);
+
+                        get_requestData(watershed, subbasin, streamcomid, stationcode, stationname, startdate);
+                        console.log("click_event",startdate );
+
                     }
                 });
             }
@@ -669,6 +675,7 @@ $(function() {
             Plotly.Plots.resize($(this)[0]);
         });
     };
+
     init_map();
     map_events();
     resize_graphs();
@@ -687,7 +694,7 @@ $(function() {
         console.log(startdate)
 
         $loading.removeClass('hidden');
-        get_time_series(watershed, subbasin, streamcomid, startdate);
+        get_time_series(watershed, subbasin, streamcomid, stationcode, stationname, startdate);
         get_time_series_bc(watershed, subbasin, streamcomid, stationcode, stationname, startdate);
     });
 
@@ -893,7 +900,7 @@ function get_available_dates(model, watershed, subbasin, comid) {
             );
 
             setTimeout(function() {
-                $('#dates').addClass('hidden')
+                // $('#dates').addClass('hidden')
             }, 5000);
         },
         success: function(dates) {
@@ -907,10 +914,11 @@ function get_available_dates(model, watershed, subbasin, comid) {
     });
 }
 
-function get_time_series(watershed, subbasin, streamcomid, startdate) {
+function get_time_series(watershed, subbasin, streamcomid, stationcode, stationname, startdate) {
+    console.log("get_time_series",startdate );
     $('#forecast-loading').removeClass('hidden');
     $('#forecast-chart').addClass('hidden');
-    $('#dates').addClass('hidden');
+    // $('#dates').addClass('hidden');
     $.ajax({
         type: 'GET',
         url: 'get-time-series/',
@@ -976,7 +984,7 @@ function get_time_series(watershed, subbasin, streamcomid, startdate) {
 function get_time_series_bc(watershed, subbasin, streamcomid, stationcode, stationname, startdate) {
     $('#forecast-bc-loading').removeClass('hidden');
     $('#forecast-bc-chart').addClass('hidden');
-    $('#dates').addClass('hidden');
+    // $('#dates').addClass('hidden');
     $.ajax({
         type: 'GET',
         url: 'get-time-series-bc/',
