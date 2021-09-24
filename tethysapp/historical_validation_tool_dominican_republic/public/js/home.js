@@ -1,6 +1,5 @@
 // Getting the csrf token
 function get_requestData (watershed, subbasin, streamcomid, stationcode, stationname, startdate){
-  console.log("get_request data");
   getdata = {
       'watershed': watershed,
       'subbasin': subbasin,
@@ -21,9 +20,7 @@ function get_requestData (watershed, subbasin, streamcomid, stationcode, station
           }, 5000);
       },
       success: function (data) {
-        console.log(data)
         get_hydrographs (watershed, subbasin, streamcomid, stationcode, stationname, startdate);
-        console.log("get_hydrographs", startdate);
       }
   })
 
@@ -520,7 +517,6 @@ function createVolumeTable(watershed, subbasin, streamcomid, stationcode, statio
 
         // handle a successful response
         success : function(resp) {
-            //console.log(resp);
             let sim_volume = resp["sim_volume"].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             let obs_volume = resp["obs_volume"].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
             let corr_volume = resp["corr_volume"].toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
@@ -697,7 +693,6 @@ $(function() {
     resize_graphs();
 
     $('#datesSelect').change(function() { //when date is changed
-    	//console.log($("#datesSelect").val());
 
         //var sel_val = ($('#datesSelect option:selected').val()).split(',');
         sel_val = $("#datesSelect").val()
@@ -766,9 +761,7 @@ $(document).ready(function() {
 });
 
 $('#metric_select2').on("select2:close", function(e) { // Display optional parameters
-    //console.log("triggered!");
     let select_val = $( '#metric_select2' ).val();
-	//console.log(select_val);
 
     if ( select_val.includes("MASE") ) {
         $('#mase_param_div').fadeIn()
@@ -838,7 +831,6 @@ function arrayUnique(array) {
 $(document).ready(function(){
 
     $("#make-table").click(function(){
-        //console.log('Make Table Event Triggered');
         var model = $('#model option:selected').text();
         var watershed = 'central_america' //OJO buscar como hacerla generica
         var subbasin = 'geoglows' //OJO buscar como hacerla generica
@@ -889,8 +881,6 @@ $(document).ready(function(){
 			success : function(resp) {
 				$("#metric-table").show();
 				$('#table').html(resp); // Render the Table
-				//console.log(resp)
-				//console.log("success"); // another sanity check
 			},
 
 			// handle a non-successful response
@@ -920,7 +910,7 @@ function makeDefaultTable(watershed, subbasin, streamcomid, stationcode, station
     metricAbbr = additionalParametersNameList[i];
     getData[metricAbbr] = $(`#${metricAbbr}`).val();
   }
-  //console.log(getData);
+
   $.ajax({
     url : "make-table-ajax", // the endpoint
     type : "GET", // http method
@@ -929,11 +919,9 @@ function makeDefaultTable(watershed, subbasin, streamcomid, stationcode, station
 
     // handle a successful response
     success : function(resp) {
-      //console.log(resp);
       $("#metric-table").show();
       $('#table').html(resp); // Render the Table
-      //console.log(resp)
-      //console.log("success"); // another sanity check
+
     },
 
     // handle a non-successful response
@@ -975,7 +963,6 @@ function get_available_dates(model, watershed, subbasin, comid) {
 }
 
 function get_time_series(watershed, subbasin, streamcomid, stationcode, stationname, startdate) {
-    console.log("get_time_series",startdate );
     $('#forecast-loading').removeClass('hidden');
     $('#forecast-chart').addClass('hidden');
     // $('#dates').addClass('hidden');
