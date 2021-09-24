@@ -85,7 +85,6 @@ def home(request):
         dates = sorted(dates)
 
     dates.append(['Select Date', dates[-1][1]])
-    # print(dates)
     dates.reverse()
 
     # Date Picker Options
@@ -116,6 +115,7 @@ def home(request):
     }
 
     return render(request, 'historical_validation_tool_dominican_republic/home.html', context)
+
 
 def get_popup_response(request):
     """
@@ -802,7 +802,7 @@ def get_units_title(unit_type):
 
 
 def get_time_series(request):
-    print("entering get_time_series")
+
     get_data = request.GET
     global comid
     global codEstacion
@@ -815,8 +815,6 @@ def get_time_series(request):
     try:
 
         startdate = get_data['startdate']
-        print('startdate')
-        print(get_data['startdate'])
 
         '''Getting Forecast Stats'''
         if  startdate != '':
@@ -831,8 +829,6 @@ def get_time_series(request):
         forecast_df.index = forecast_df.index.to_series().dt.strftime("%Y-%m-%d %H:%M:%S")
         forecast_df.index = pd.to_datetime(forecast_df.index)
 
-        # print (forecast_df)
-
         hydroviewer_figure = geoglows.plots.forecast_stats(stats=forecast_df, titles={'Reach ID': comid})
 
         x_vals = (forecast_df.index[0], forecast_df.index[len(forecast_df.index) - 1], forecast_df.index[len(forecast_df.index) - 1], forecast_df.index[0])
@@ -841,13 +837,12 @@ def get_time_series(request):
         '''Get Forecasts Records'''
         forecast_record = geoglows.streamflow.forecast_records(comid)
         forecast_record[forecast_record < 0] = 0
-
-        # print(forecast_record)
+        forecast_record.index = forecast_record.index.to_series().dt.strftime("%Y-%m-%d %H:%M:%S")
+        forecast_record.index = pd.to_datetime(forecast_record.index)
 
         record_plot = forecast_record.copy()
-        #record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
-
-        # print(record_plot)
+        record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+        record_plot = record_plot.loc[record_plot.index <= pd.to_datetime(forecast_df.index[0] + dt.timedelta(days=2))]
 
         '''Getting forecast record'''
 
@@ -920,8 +915,6 @@ def get_time_series(request):
             print(e)
         chart_obj = PlotlyView(hydroviewer_figure)
 
-        print(chart_obj)
-
         context = {
             'gizmo_object': chart_obj,
         }
@@ -954,8 +947,6 @@ def get_time_series_bc(request):
 
         startdate = get_data['startdate']
 
-        print(get_data['startdate'])
-
         '''Getting Forecast Stats'''
         if startdate != '':
             res = requests.get('https://geoglows.ecmwf.int/api/ForecastEnsembles/?reach_id=' + comid + '&date=' + startdate + '&return_format=csv', verify=False).content
@@ -972,8 +963,8 @@ def get_time_series_bc(request):
         '''Get Forecasts Records'''
         forecast_record = geoglows.streamflow.forecast_records(comid)
         forecast_record[forecast_record < 0] = 0
-
-        print(forecast_record)
+        forecast_record.index = forecast_record.index.to_series().dt.strftime("%Y-%m-%d %H:%M:%S")
+        forecast_record.index = pd.to_datetime(forecast_record.index)
 
         monthly_simulated = simulated_df[simulated_df.index.month == (forecast_ens.index[0]).month].dropna()
         monthly_observed = observed_df[observed_df.index.month == (forecast_ens.index[0]).month].dropna()
@@ -1034,8 +1025,6 @@ def get_time_series_bc(request):
 
         fixed_stats = pd.concat([max_df, p75_df, mean_df, p25_df, min_df, high_res_df], axis=1)
 
-        print (fixed_stats)
-
         #fixed_stats = geoglows.bias.correct_forecast(forecast_df, simulated_df, observed_df)
 
         hydroviewer_figure = geoglows.plots.forecast_stats(stats=fixed_stats, titles={'Station': nomEstacion + '-' + str(codEstacion), 'Reach ID': comid, 'bias_corrected': True})
@@ -1045,12 +1034,12 @@ def get_time_series_bc(request):
 
         '''Getting forecast record'''
 
-        '''Correct Bias Forecasts Records'''
-        fixed_records = geoglows.bias.correct_forecast(forecast_record, simulated_df, observed_df, use_month=-1)
-        record_plot = fixed_records.copy()
-        # record_plot = record_plot.loc[record_plot.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+        fixed_records = forecast_record.copy()
+        fixed_records = fixed_records.loc[fixed_records.index >= pd.to_datetime(forecast_df.index[0] - dt.timedelta(days=8))]
+        fixed_records = fixed_records.loc[fixed_records.index <= pd.to_datetime(forecast_df.index[0] + dt.timedelta(days=2))]
 
-        print(record_plot)
+        '''Correct Bias Forecasts Records'''
+        record_plot = geoglows.bias.correct_forecast(fixed_records, simulated_df, observed_df, use_month=-1)
 
         if len(record_plot.index) > 0:
             hydroviewer_figure.add_trace(go.Scatter(
@@ -1170,8 +1159,6 @@ def get_available_dates(request):
 
     dates_array = (data.get('available_dates'))
 
-    # print(dates_array)
-
     dates = []
 
     for date in dates_array:
@@ -1184,9 +1171,7 @@ def get_available_dates(request):
         dates.append([date_f, date, watershed, subbasin, comid])
 
     dates.append(['Select Date', dates[-1][1]])
-    # print(dates)
     dates.reverse()
-    print(dates)
 
     return JsonResponse({
         "success": "Data analysis complete!",
